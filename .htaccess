@@ -10,7 +10,9 @@ Options +FollowSymLinks
   RewriteEngine On
   
   # 1.不支持webp的浏览器自动由webp转到jpg
-  RewriteCond %{HTTP_ACCEPT} text/html
+  
+  RewriteCond %{HTTP_USER_AGENT} !.*Chrome.* [OR]
+  RewriteCond %{HTTP_USER_AGENT} .*Edge.*
   RewriteCond %{DOCUMENT_ROOT}/$1/image/$3.jpg -f
 
   # Serve WebP image instead
