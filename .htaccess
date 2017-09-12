@@ -1,4 +1,12 @@
 ﻿<IfModule mod_rewrite.c>
+  
+<Files ~ "^.(htaccess|htpasswd)$">
+deny from all
+</Files>
+
+Options -Indexes
+Options +FollowSymLinks
+  
   RewriteEngine On
   
   # 1.不支持webp的浏览器自动由webp转到jpg
