@@ -53,17 +53,17 @@
 		  echo '{"status":"0","msg":"文件类型或大小错误"}';
 		}
 		else{
-		  $file = $_FILES["file"];
-		  $name = $file["name"];
-		  $filename = $file["name"];
+        $file = $_FILES["file"];
+        $name = $file["name"];
+        $filename = $file["name"];
 		  if(strpos($name,'.')==-1){
-			$arr = explode('/',$file['type']);
-			$fileType = '.'.$arr[count($arr)-1];
+        $arr = explode('/',$file['type']);
+        $fileType = '.'.$arr[count($arr)-1];
 		  }else{
 			$arr = explode('.',$filename);
-			$fileType = '.'.$arr[count($arr)-1];
-			$arr[count($arr)-1]='';
-			$filename = implode('',$arr);
+        $fileType = '.'.$arr[count($arr)-1];
+        $arr[count($arr)-1]='';
+        $filename = implode('',$arr);
 		  }
 		  
 		  //随机值          
@@ -77,22 +77,22 @@
 		  
 		  //图片文件处理：1.获取宽高;2.转换为webp
 		  if(strripos($file["type"],'image')>-1){
-			$size = getimagesize($file["tmp_name"]);
-			$return['width'] = $size[0];
-			$return['height'] = $size[1];
-			$distFile = $pathImg.$filename.$fileType;
+        $size = getimagesize($file["tmp_name"]);
+        $return['width'] = $size[0];
+        $return['height'] = $size[1];
+        $distFile = $pathImg.$filename.$fileType;
 		  }else if(strripos($file["type"],'audio')>-1){           
-			$return['width'] = 0;
-			$return['height'] = 0;
-			$distFile = $pathAudio.$filename.$fileType;
-		  }else if(strripos($file["type"],'video')>-1){           
-			$return['width'] = 0;
-			$return['height'] = 0;
-			$distFile = $pathVideo.$filename.$fileType;
+        $return['width'] = 0;
+        $return['height'] = 0;
+        $distFile = $pathAudio.$filename.$fileType;
+		  }else if(strripos($file["type"],'video')>-1 || strripos($fileType,'flv')>-1){           
+        $return['width'] = 0;
+        $return['height'] = 0;
+        $distFile = $pathVideo.$filename.$fileType;
 		  }else{           
-			$return['width'] = 0;
-			$return['height'] = 0;
-			$distFile = $pathFile.$filename.$fileType;
+        $return['width'] = 0;
+        $return['height'] = 0;
+        $distFile = $pathFile.$filename.$fileType;
 		  }
 		  
 		  move_uploaded_file($file["tmp_name"],$distFile); 
