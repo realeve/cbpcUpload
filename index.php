@@ -56,93 +56,93 @@
         $file = $_FILES["file"];
         $name = $file["name"];
         $filename = $file["name"];
-		  if(strpos($name,'.')==-1){
-        $arr = explode('/',$file['type']);
-        $fileType = '.'.$arr[count($arr)-1];
-		  }else{
-			$arr = explode('.',$filename);
-        $fileType = '.'.$arr[count($arr)-1];
-        $arr[count($arr)-1]='';
-        $filename = implode('',$arr);
-		  }
-		  
-		  //随机值          
-		  // $filename = time().'_'.(microtime()*1000000).'_'.$filename;
-		  // $filename = base64_encode($filename);
-		  //base64中的'/'不能作为文件名内容
-		  // $filename = str_replace("/",'-',$filename); 
-		  $filename = time().'_'.(microtime()*1000000) . createNonceStr();
-		  
-		  $fileType = str_replace("image/svg",'svg',$fileType);
-		  
-		  //图片文件处理：1.获取宽高;2.转换为webp
-		  if(strripos($file["type"],'image')>-1){
-        $size = getimagesize($file["tmp_name"]);
-        $return['width'] = $size[0];
-        $return['height'] = $size[1];
-        $distFile = $pathImg.$filename.$fileType;
-		  }else if(strripos($file["type"],'audio')>-1){           
-        $return['width'] = 0;
-        $return['height'] = 0;
-        $distFile = $pathAudio.$filename.$fileType;
-		  }else if(strripos($file["type"],'video')>-1 || strripos($fileType,'flv')>-1){           
-        $return['width'] = 0;
-        $return['height'] = 0;
-        $distFile = $pathVideo.$filename.$fileType;
-		  }else{           
-        $return['width'] = 0;
-        $return['height'] = 0;
-        $distFile = $pathFile.$filename.$fileType;
-		  }
-		  
-		  move_uploaded_file($file["tmp_name"],$distFile); 
-		  $return['size'] = round($file["size"] / 1024,2)+'kb';
-		  $return['type'] = $file["type"];
-		  $return['url'] = $pathFile.$filename.$fileType;
-			
-		  //图片文件处理：1.获取宽高;2.转换为webp
-		  if($return['width']){         
-			//apache GD库默认对webp处理有较多BUG，转用 imagick方案
-			// 此处需使用绝对路径，需要根据实际目录做设置
-			$imgageDir = $_SERVER['DOCUMENT_ROOT'] .'/upload/'."assets/$year/$month/";
-			
-			$srcFile = $imgageDir.'image/'.$filename.$fileType;  
-			$thumbFile = $imgageDir.'image/thumb_'.$filename.$fileType;
-			
-			$distFile = $imgageDir.'webp/'.$filename.'.webp';          
-			$thumbWebpFile = $imgageDir.'webp/thumb_'.$filename.'.webp';
-			
-			$image = new Imagick($srcFile);			
-			// $image->stripImage();//去掉exif等信息，如果是新闻网站则不应去掉
-			$image->setImageFormat('webp');
-			$image->setImageCompression(Imagick::COMPRESSION_JPEG); 
-			$image->setImageCompressionQuality(80); 
-			//转换效果与谷歌官方 cwebp -q 80 input.jpg -o oubput.webp 接近
-			$image->writeImage($distFile);
-			
-			//生成Webp缩略图
-			$image->thumbnailImage(360,null); 
-			$image->writeImage($thumbWebpFile); 
-			
-			// 生成普通缩略图
-			$image = new Imagick($srcFile);	
-			$image->thumbnailImage(360,null); 
-			$image->writeImage($thumbFile); 			
-			
-			// 不删除原图片
-			// unlink($srcFile);
-			
-			$size = filesize($distFile);
-			$return['size'] = round($size / 1024,2)+'kb';
-			$return['type'] = 'images/webp';
-			$return['url'] = $pathWebp.$filename.'.webp';
-		  } 
-		  
-		  $return['status'] = 1;
-		  $return['msg'] = '上传成功';
-		  $return['name'] = $name;
-		  $return['url'] = str_replace('./','/',$return['url']);
-		  echo json_encode($return);
+        if(strpos($name,'.')==-1){
+          $arr = explode('/',$file['type']);
+          $fileType = '.'.$arr[count($arr)-1];
+        }else{
+        $arr = explode('.',$filename);
+          $fileType = '.'.$arr[count($arr)-1];
+          $arr[count($arr)-1]='';
+          $filename = implode('',$arr);
+        }
+        
+        //随机值          
+        // $filename = time().'_'.(microtime()*1000000).'_'.$filename;
+        // $filename = base64_encode($filename);
+        //base64中的'/'不能作为文件名内容
+        // $filename = str_replace("/",'-',$filename); 
+        $filename = time().'_'.(microtime()*1000000) . createNonceStr();
+        
+        $fileType = str_replace("image/svg",'svg',$fileType);
+        
+        //图片文件处理：1.获取宽高;2.转换为webp
+        if(strripos($file["type"],'image')>-1){
+          $size = getimagesize($file["tmp_name"]);
+          $return['width'] = $size[0];
+          $return['height'] = $size[1];
+          $distFile = $pathImg.$filename.$fileType;
+        }else if(strripos($file["type"],'audio')>-1){           
+          $return['width'] = 0;
+          $return['height'] = 0;
+          $distFile = $pathAudio.$filename.$fileType;
+        }else if(strripos($file["type"],'video')>-1){           
+          $return['width'] = 0;
+          $return['height'] = 0;
+          $distFile = $pathVideo.$filename.$fileType;
+        }else{           
+          $return['width'] = 0;
+          $return['height'] = 0;
+          $distFile = $pathFile.$filename.$fileType;
+        }
+        
+        move_uploaded_file($file["tmp_name"],$distFile); 
+        $return['size'] = round($file["size"] / 1024,2)+'kb';
+        $return['type'] = $file["type"];
+        $return['url'] = $distFile;
+        
+        //图片文件处理：1.获取宽高;2.转换为webp
+        if($return['width']){         
+        //apache GD库默认对webp处理有较多BUG，转用 imagick方案
+        // 此处需使用绝对路径，需要根据实际目录做设置
+        $imgageDir = $_SERVER['DOCUMENT_ROOT'] .'/upload/'."assets/$year/$month/";
+        
+        $srcFile = $imgageDir.'image/'.$filename.$fileType;  
+        $thumbFile = $imgageDir.'image/thumb_'.$filename.$fileType;
+        
+        $distFile = $imgageDir.'webp/'.$filename.'.webp';          
+        $thumbWebpFile = $imgageDir.'webp/thumb_'.$filename.'.webp';
+        
+        $image = new Imagick($srcFile);			
+        // $image->stripImage();//去掉exif等信息，如果是新闻网站则不应去掉
+        $image->setImageFormat('webp');
+        $image->setImageCompression(Imagick::COMPRESSION_JPEG); 
+        $image->setImageCompressionQuality(80); 
+        //转换效果与谷歌官方 cwebp -q 80 input.jpg -o oubput.webp 接近
+        $image->writeImage($distFile);
+        
+        //生成Webp缩略图
+        $image->thumbnailImage(360,null); 
+        $image->writeImage($thumbWebpFile); 
+        
+        // 生成普通缩略图
+        $image = new Imagick($srcFile);	
+        $image->thumbnailImage(360,null); 
+        $image->writeImage($thumbFile); 			
+        
+        // 不删除原图片
+        // unlink($srcFile);
+        
+        $size = filesize($distFile);
+        $return['size'] = round($size / 1024,2)+'kb';
+        $return['type'] = 'images/webp';
+        $return['url'] = $pathWebp.$filename.'.webp';
+        } 
+        
+        $return['status'] = 1;
+        $return['msg'] = '上传成功';
+        $return['name'] = $name;
+        $return['url'] = str_replace('./','/',$return['url']);
+        echo json_encode($return);
 		}
 	  }
 	}
