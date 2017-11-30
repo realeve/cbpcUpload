@@ -104,7 +104,7 @@
         if($return['width']){         
         //apache GD库默认对webp处理有较多BUG，转用 imagick方案
         // 此处需使用绝对路径，需要根据实际目录做设置
-        $imgageDir = $_SERVER['DOCUMENT_ROOT'] .'/upload/'."assets/$year/$month/";
+        $imgageDir = $_SERVER['DOCUMENT_ROOT'] ."/assets/$year/$month/";
         
         $srcFile = $imgageDir.'image/'.$filename.$fileType;  
         $thumbFile = $imgageDir.'image/thumb_'.$filename.$fileType;
