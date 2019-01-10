@@ -1,5 +1,4 @@
-<?php
-
+﻿<?php
 function handleDir()
 {
     $year = date('Y');
@@ -49,8 +48,8 @@ function handlePost()
     $pathAudio = "$content/audio/";
     $pathWebp = "$content/webp/";
     header("Content-type: application/json");
-    // 100M大小限制
-    if ($_FILES["file"]["size"] < 1024 * 1024 * 100) {
+    // 500M大小限制
+    if ($_FILES["file"]["size"] < 1024 * 1024 * 500) {
         if ($_FILES["file"]["error"] > 0) {
             echo '{"status":"0","msg":"文件类型或大小错误"}';
         } else {
@@ -114,29 +113,46 @@ function handlePost()
                 $thumbWebpFile = $imgageDir . 'webp/thumb_' . $filename . '.webp';
 
                 $image = new Imagick($srcFile);
+
+                // $image->setResourceLimit(Imagick::RESOURCETYPE_AREA,5e+9);
                 // $image->stripImage();//去掉exif等信息，如果是新闻网站则不应去掉
                 $image->setImageFormat('webp');
                 $image->setImageCompression(Imagick::COMPRESSION_JPEG);
                 $image->setImageCompressionQuality(80);
                 //转换效果与谷歌官方 cwebp -q 80 input.jpg -o oubput.webp 接近
-                $image->writeImage($distFile);
 
-                //生成Webp缩略图
-                $image->thumbnailImage(360, null);
-                $image->writeImage($thumbWebpFile);
+                // 20190108
+                // webp 文件过大时报错超过 width & height exceeds
+                try {
+                    $image->writeImage($distFile);
+                    //生成Webp缩略图
+                    $image->thumbnailImage(360, null);
+                    $image->writeImage($thumbWebpFile);
 
-                // 生成普通缩略图
-                $image = new Imagick($srcFile);
-                $image->thumbnailImage(360, null);
-                $image->writeImage($thumbFile);
+                    // 生成普通缩略图
+                    $image = new Imagick($srcFile);
+                    $image->thumbnailImage(360, null);
+                    $image->writeImage($thumbFile);
 
-                // 不删除原图片
-                // unlink($srcFile);
+                    // 不删除原图片
+                    // unlink($srcFile);
 
-                $size = filesize($distFile);
-                $return['size'] = round($size / 1024, 2)+'kb';
-                $return['type'] = 'images/webp';
-                $return['url'] = $pathWebp . $filename . '.webp';
+                    $size = filesize($distFile);
+                    $return['size'] = round($size / 1024, 2)+'kb';
+                    $return['type'] = 'images/webp';
+                    $return['url'] = $pathWebp . $filename . '.webp';
+                } catch (ImagickException $err) {
+                    // handle err
+                    // 生成普通缩略图
+                    $image = new Imagick($srcFile);
+                    $image->thumbnailImage(360, null);
+                    $image->writeImage($thumbFile);
+                    $size = 0;
+                    $return['size'] = round($size / 1024, 2)+'kb';
+                    $return['type'] = 'images/image';
+                    $return['url'] = $pathImg . $filename . $fileType;
+                }
+
             }
 
             $return['status'] = 1;
@@ -185,7 +201,7 @@ function init()
 {
     $requestType = $_SERVER['REQUEST_METHOD'];
     // 指定允许其他域名访问 // 正式布署请设置为前端资源主站
-    header('Access-Control-Allow-Origin:*');
+    // header('Access-Control-Allow-Origin:*');
     // 响应类型
     header('Access-Control-Allow-Methods:GET,POST,PUT,OPTIONS');
     header('Access-Control-Allow-Headers:x-requested-with,content-type');
