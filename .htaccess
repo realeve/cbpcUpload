@@ -1,13 +1,18 @@
 ﻿<IfModule mod_rewrite.c>
-  
-<Files ~ "^.(htaccess|htpasswd)$">
-deny from all
-</Files>
+	<Files ~ "^.(htaccess|htpasswd)$">
+	deny from all
+	</Files>
 
-Options -Indexes
-Options +FollowSymLinks
-  
+
+	Options -Indexes
+	Options +FollowSymLinks
+
+
   RewriteEngine On
+  
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^(.*)$ $1.php [QSA,PT,L]
   
   # 1.不支持webp的浏览器自动由webp转到jpg
   
