@@ -105,7 +105,7 @@ class FtpConn{
      * @param string $remote_file 文件地址
      */
     public function delete_file(string $remote_file=''){
-        $result = @ftp_delete($this->conn,$remote_file);
+        $result = @ftp_delete($this->conn,$remote_file); 
         if ($result === FALSE){
             return FALSE;
         }

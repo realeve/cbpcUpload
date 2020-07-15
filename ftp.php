@@ -1,6 +1,17 @@
 ﻿<?php 
 include 'ftp_lib.php'; 
 
+/*	libin 
+	2020-07-15: 上传PDF文件至MES服务器；
+*/
+
+$config = [
+	'host'=>'mes.cdyc.cbpm',
+	'user'=>'ftper',
+	'pass'=>'5guang10se',
+	'port'=>'2001'
+]; 
+$dirName = "nepal/";
 
 function createNonceStr($length = 32) {
 	$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -11,26 +22,29 @@ function createNonceStr($length = 32) {
 	return $str;
 }
 
+function getFtp(){ 
+	global $config;
+    $ftp = new FtpConn($config);
+    $result = $ftp->connect();
+    if (!$result){
+        handleErr($ftp->get_error_msg());
+        return false;
+    }  
+	return $ftp; 
+}
+
 function handlePost()
 { 
+	global $dirName;
 	/*
 	$conn_id = ftp_connect('10.9.3.5',2001);  
 	$login_result = ftp_login($conn_id, 'ftper', '5guang10se');
 	*/
  
-	// mes.cdyc.cbpm
-	$config = [
-		'host'=>'mes.cdyc.cbpm',
-		'user'=>'ftper',
-		'pass'=>'5guang10se',
-		'port'=>'2001'
-	]; 
-    $ftp = new FtpConn($config);
-    $result = $ftp->connect();
-    if (!$result){
-        handleErr($ftp->get_error_msg());
-        return;
-    }  
+	$ftp = getFtp();
+	if(!$ftp){
+		return;
+	} 
 	
     // 500M大小限制
     if ($_FILES["file"]["size"] < 1024 * 1024 * 500) {
@@ -48,7 +62,7 @@ function handlePost()
 				$filename = time().'_'.createNonceStr(8).$fileType;
 			} 
 			
-            $remote_file = "nepal/".$filename; 
+            $remote_file = $dirName.$filename; 
             $return['msg'] = "上传失败";
             if ($ftp->upload($file['tmp_name'],$remote_file)){
                 $return['msg'] = "上传成功";
@@ -73,6 +87,39 @@ function handleErr($error='上传文件失败')
     echo json_encode($return);
 }
 
+// 删除文件
+// URL: http://10.8.1.25/ftp?name=NRB10_B82000001_20200715.pdf
+function handleGet(){
+  header("Content-type: application/json");
+  global $dirName;
+  if(isset($_GET['name'])){
+	  
+	$ftp = getFtp();
+	if(!$ftp){
+		return;
+	}  
+	$filename = $dirName.$_GET['name']; 
+	if ($ftp->delete_file($filename)){
+		$return['status'] = 1;
+		$return['msg'] = '文件删除成功'; 
+	}else{
+		$return['status'] = 0;
+		$return['msg'] = '文件'.$filename.'删除失败';
+	}    
+	$ftp->close();
+	
+  }else{
+	  $return['status'] = 0;
+	  $return['msg'] = '请求参数错误，需要指定name字段';
+  }
+  
+  if(isset($_GET['callback'])){
+	echo $_GET['callback'].'('.json_encode($return).')';
+  }else{
+	echo json_encode($return);
+  }  
+}
+	
 function init()
 {
     $requestType = $_SERVER['REQUEST_METHOD'];
@@ -93,6 +140,8 @@ function init()
     }else{
 		if ($requestType == "POST") {		
 			handlePost();
+		}else if($requestType == "GET"){     
+			handleGet();		  
 		} else {
 			handleErr();
 		} 
