@@ -1,4 +1,4 @@
-﻿<?php 
+<?php
 include 'ftp_lib.php'; 
 
 /*	libin 
@@ -90,7 +90,7 @@ function handleErr($error='上传文件失败')
 // 删除文件
 // URL: http://10.8.1.25/ftp?name=NRB10_B82000001_20200715.pdf
 function handleGet(){
-  header("Content-type: application/json");
+  
   global $dirName;
   if(isset($_GET['name'])){
 	  
@@ -138,6 +138,7 @@ function init()
         header("status: 204");
         header("HTTP/1.0 204 No Content");
     }else{
+		header("Content-type: application/json");
 		if ($requestType == "POST") {		
 			handlePost();
 		}else if($requestType == "GET"){     

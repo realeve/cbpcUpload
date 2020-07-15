@@ -1,4 +1,4 @@
-﻿<?php    	
+<?php
 	function handleDir(){
 		$year = date('Y');
 		$month = date('m');
