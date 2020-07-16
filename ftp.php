@@ -65,8 +65,16 @@ function handlePost()
                 $fileType = '';
                 $arr = explode('/', $file['type']);
                 $fileType = '.'.$arr[count($arr)-1];
-                $filename = time().'_'.createNonceStr(8).$fileType;
+                $filename = time();
+            } else {
+                $arr = explode('.', $filename);
+                $fileType = '.'.$arr[count($arr)-1];
+                $arr[count($arr)-1] = '';
+                $filename = implode('', $arr);
             }
+
+            // 此处追加一段noncer，确保移除接口不会文件执行遍历删除的操作；
+            $filename = $filename.'_'.createNonceStr(10).$fileType;
 
             $remote_file = $dirName.$filename;
             $return['msg'] = "上传失败";
@@ -75,7 +83,7 @@ function handlePost()
             }
             $return['url'] = $remote_file;
             $return['status'] = 1;
-            $return['name'] = $name;
+            $return['name'] = $filename;
 
             // 关闭链接
             $ftp->close();
