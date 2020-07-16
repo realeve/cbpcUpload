@@ -104,7 +104,7 @@ class FtpConn{
      * 删除ftp服务器端文件
      * @param string $remote_file 文件地址
      */
-    public function delete_file(string $remote_file=''){
+    public function delete_file($remote_file=''){
         $result = @ftp_delete($this->conn,$remote_file); 
         if ($result === FALSE){
             return FALSE;
@@ -148,7 +148,7 @@ class FtpConn{
      * 递归删除ftp端目录
      * @param string $remote_dir ftp目录地址
      */
-    public function delete_dir(string $remote_dir=''){
+    public function delete_dir($remote_dir=''){
         $list = $this->list_file($remote_dir);
         if ( ! empty($list)){
             $count = count($list);
@@ -172,7 +172,7 @@ class FtpConn{
      * @param string $old_file 旧文件/文件夹名
      * @param string $new_file 新文件/文件夹名
      */
-    public function remane(string $old_file='',string $new_file=''){
+    public function remane($old_file='',$new_file=''){
         $result = @ftp_rename($this->conn,$old_file,$new_file);
         if ($result === FALSE){
             $this->error = "移动失败";
@@ -185,7 +185,7 @@ class FtpConn{
      * 列出ftp指定目录
      * @param string $remote_path
      */
-    public function list_file(string $remote_path=''){
+    public function list_file($remote_path=''){
         $contents = @ftp_nlist($this->conn, $remote_path);
         return $contents;
     }

@@ -45,6 +45,11 @@ function handlePost()
 	if(!$ftp){
 		return;
 	} 
+	if(!$_FILES || !$_FILES["file"])
+	{
+		echo '{"status":"0","msg":"未读取到文件"}';
+		return;
+	}
 	
     // 500M大小限制
     if ($_FILES["file"]["size"] < 1024 * 1024 * 500) {
@@ -127,8 +132,7 @@ function init()
 	
     // 响应类型
     header('Access-Control-Allow-Methods:GET,POST,PUT,OPTIONS');
-    header('Access-Control-Allow-Headers:x-requested-with,content-type');
-	// header('Access-Control-Allow-Origin:*');
+    header('Access-Control-Allow-Headers:x-requested-with,content-type'); 
 	
     if ($requestType == "OPTIONS") {
         header('Access-Control-Allow-Credentials:true');
